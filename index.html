@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FORM KLAIM KENDARAAN NON FASILITAS JABATAN (MOBIL/MOTOR)</title>
+    <!-- Library Supabase JS Cloud Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -23,7 +25,6 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.15);
         }
         
-        /* Action Bar */
         .action-bar {
             display: flex;
             justify-content: space-between;
@@ -58,7 +59,6 @@
         .btn-remove { background-color: #dc3545; color: white; padding: 4px 8px; font-size: 12px; border-radius: 3px; border:none; cursor:pointer;}
         .btn:hover { opacity: 0.9; }
 
-        /* Header Form */
         .company-header {
             text-align: left;
             font-weight: bold;
@@ -72,7 +72,6 @@
             margin-bottom: 20px;
         }
 
-        /* Grid Informasi Pemakai & Rekening */
         .info-table {
             width: 100%;
             border-collapse: collapse;
@@ -102,13 +101,7 @@
             font-size: 13px;
             background-color: #fff;
         }
-        .info-table input:focus {
-            border-color: #007bff;
-            outline: 2px solid #80bdff;
-            background-color: #f8f9ff;
-        }
 
-        /* Tabel Klaim Perjalanan */
         .klaim-table {
             width: 100%;
             border-collapse: collapse;
@@ -139,18 +132,9 @@
             background: #fff;
             font-size: 12px;
         }
-        .klaim-table input:focus {
-            border-color: #007bff;
-            background-color: #eef5ff;
-        }
-        .klaim-table input.text-left {
-            text-align: left;
-        }
-        .klaim-table input.text-center {
-            text-align: center;
-        }
+        .klaim-table input.text-left { text-align: left; }
+        .klaim-table input.text-center { text-align: center; }
 
-        /* Area Tanda Tangan dan Footer */
         .footer-section {
             display: flex;
             justify-content: space-between;
@@ -189,7 +173,6 @@
             margin-bottom: 5px;
         }
 
-        /* MODAL PENCARIAN */
         .modal {
             display: none;
             position: fixed;
@@ -217,11 +200,7 @@
             padding-bottom: 10px;
             margin-bottom: 15px;
         }
-        .close-modal {
-            font-size: 20px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+        .close-modal { font-size: 20px; cursor: pointer; font-weight: bold; }
 
         #alertMsg {
             display: none;
@@ -233,40 +212,14 @@
             font-size: 12px;
         }
 
-        /* STYLE PRINT */
         @media print {
-            body {
-                background: #fff;
-                margin: 0;
-                padding: 0;
-            }
-            .container {
-                box-shadow: none;
-                padding: 0;
-                width: 100%;
-                max-width: 100%;
-            }
-            .no-print {
-                display: none !important;
-            }
-            input {
-                border: none !important;
-                background: transparent !important;
-                appearance: none;
-                -webkit-appearance: none;
-                box-shadow: none !important;
-                padding: 0 !important;
-            }
-            input[type="date"]::-webkit-calendar-picker-indicator {
-                display: none;
-            }
-            .klaim-table th {
-                background-color: transparent !important;
-            }
-            @page {
-                size: A4 landscape;
-                margin: 10mm;
-            }
+            body { background: #fff; margin: 0; padding: 0; }
+            .container { box-shadow: none; padding: 0; width: 100%; max-width: 100%; }
+            .no-print { display: none !important; }
+            input { border: none !important; background: transparent !important; box-shadow: none !important; padding: 0 !important; }
+            input[type="date"]::-webkit-calendar-picker-indicator { display: none; }
+            .klaim-table th { background-color: transparent !important; }
+            @page { size: A4 landscape; margin: 10mm; }
         }
     </style>
 </head>
@@ -274,34 +227,29 @@
 
 <div class="container">
     
-    <!-- Action Bar -->
     <div class="action-bar no-print">
         <div id="alertMsg">Data berhasil disimpan!</div>
         <div class="btn-group" style="margin-left: auto;">
             <button class="btn btn-reset" onclick="resetForm()">🔄 Bersihkan Form</button>
             <button class="btn btn-search" onclick="bukaModalCari()">🔍 Cari Data</button>
-            <button class="btn btn-save" onclick="simpanData()">💾 Simpan Data</button>
+            <button class="btn btn-save" onclick="simpanDataCloud()">💾 Simpan Data</button>
             <button class="btn btn-print" onclick="printPDF()">🖨️ Print PDF</button>
         </div>
     </div>
 
-    <!-- Header Perusahaan -->
     <div class="company-header">
         PT SUMBER ALFARIA TRIJAYA TBK
     </div>
 
-    <!-- Judul Form -->
     <div class="form-title">
         FORM KLAIM KENDARAAN NON FASILITAS JABATAN (MOBIL/MOTOR)
     </div>
 
-    <!-- Informasi Nomor Faktur & Tanggal Input -->
     <div style="margin-bottom: 15px; font-size: 13px; font-weight: bold; color: #333;" id="infoFakturBar">
         No. Faktur: <span id="dispNoFaktur" style="color: #007bff;">(Otomatis saat simpan)</span> | 
         Tgl Input: <span id="dispTglInput">-</span>
     </div>
 
-    <!-- Form Informasi Header -->
     <table class="info-table">
         <tr>
             <td class="label">Nama Pemakai</td>
@@ -341,10 +289,8 @@
         </tr>
     </table>
 
-    <!-- Tombol Tambah Baris -->
     <button class="btn btn-add no-print" onclick="tambahBaris()">+ Tambah Baris Perjalanan</button>
 
-    <!-- Tabel Detail Perjalanan -->
     <table class="klaim-table" id="tabelKlaim">
         <thead>
             <tr>
@@ -360,9 +306,7 @@
                 <th class="no-print" style="width: 4%;">Aksi</th>
             </tr>
         </thead>
-        <tbody id="tbodyKlaim">
-            <!-- Dynamic Rows -->
-        </tbody>
+        <tbody id="tbodyKlaim"></tbody>
         <tfoot>
             <tr style="font-weight: bold; background-color: #f8f9fa;">
                 <td colspan="8" style="text-align: right; padding-right: 10px;">Total Rp</td>
@@ -372,7 +316,6 @@
         </tfoot>
     </table>
 
-    <!-- Bagian Tanda Tangan & Footer Ref -->
     <div class="footer-section">
         <div>
             <div class="signatures-container">
@@ -401,23 +344,30 @@
 
 </div>
 
-<!-- MODAL POPUP PENCARIAN FAKTUR -->
+<!-- MODAL POPUP PENCARIAN -->
 <div id="modalCari" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3 style="margin:0;">Pencarian Data Faktur</h3>
+            <h3 style="margin:0;">Pencarian Data Cloud</h3>
             <span class="close-modal" onclick="tutupModalCari()">&times;</span>
         </div>
         <div style="margin-bottom: 15px;">
             <label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 5px;">Masukkan No. Faktur / Nama Pemakai:</label>
             <input type="text" id="inputCariFaktur" placeholder="Contoh: FK-20261010-001" style="width: 100%; padding: 8px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px;">
-            <button class="btn btn-search" style="width: 100%; margin-top: 8px; justify-content: center;" onclick="prosesCariFaktur()">Cari Faktur</button>
+            <button class="btn btn-search" style="width: 100%; margin-top: 8px; justify-content: center;" onclick="prosesCariFakturCloud()">Cari Faktur</button>
         </div>
         <div id="hasilPencarian" style="max-height: 200px; overflow-y: auto; font-size: 12px;"></div>
     </div>
 </div>
 
 <script>
+    // ==========================================
+    // INSIALISASI KONEKSI SUPABASE CLOUD
+    // ==========================================
+    const SUPABASE_URL = 'https://supabase.co'; 
+    const SUPABASE_KEY = 'sb_publishable_V6tYk5mZKvvN94res3TUrQ_yjrMXavb'; 
+    const dbCloud = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     let currentFaktur = "";
     let currentTglInput = "";
 
@@ -428,10 +378,10 @@
         { tgl: "2026-08-12", asal: "UE37", tujuan: "UF20", km: 1.3, ket: "RPIT", parkir: 0 },
         { tgl: "2026-08-13", asal: "ADAM MALIK", tujuan: "UD89", km: 1.3, ket: "RPIT", parkir: 0 },
         { tgl: "2026-08-15", asal: "UD89", tujuan: "UE42", km: 5.8, ket: "RPIT", parkir: 0 },
-        { tgl: "2026-08-18", asal: "UE42", tujuan: "UE 04", km: 47.0, ket: "RPIT", parkir: 0 },
-        { tgl: "2026-08-20", asal: "U E04", tujuan: "UE19", km: 17.0, ket: "RPIT", parkir: 0 },
-        { tgl: "2026-08-26", asal: "UE19", tujuan: "4073", km: 1.4, ket: "RPIT", parkir: 0 },
-        { tgl: "2026-08-28", asal: "14073", tujuan: "UD90", km: 1.2, ket: "RPIT", parkir: 0 }
+        { tgl: "2026-08-18", asal: "UE42", tujuan: "UE04", km: 47.0, ket: "RPIT", parkir: 0 },
+        { tgl: "2026-08-20", asal: "UE04", tujuan: "UE19", km: 17.0, ket: "RPIT", parkir: 0 },
+        { tgl: "2026-08-26", asal: "UE19", tujuan: "UE73", km: 1.4, ket: "RPIT", parkir: 0 },
+        { tgl: "2026-08-28", asal: "UE73", tujuan: "UD90", km: 1.2, ket: "RPIT", parkir: 0 }
     ];
 
     function initPage() {
@@ -512,17 +462,17 @@
         return `FK-${dateStr}-${rand}`;
     }
 
-    function simpanData() {
+    // SIMPAN KE DATABASE CLOUD SUPABASE
+    async function simpanDataCloud() {
         if (!currentFaktur) {
             currentFaktur = generateNoFaktur();
-            currentTglInput = new Date().toLocaleString('id-ID');
+            currentTglInput = new Date().toISOString();
         }
 
         document.getElementById("dispNoFaktur").innerText = currentFaktur;
-        document.getElementById("dispTglInput").innerText = currentTglInput;
+        document.getElementById("dispTglInput").innerText = new Date(currentTglInput).toLocaleString('id-ID');
 
-        // Kumpulkan data sesuai struktur database
-        const klaimHeader = {
+        const headerData = {
             no_faktur: currentFaktur,
             tgl_input: currentTglInput,
             nama_pemakai: document.getElementById("namaPemakai").value,
@@ -535,36 +485,50 @@
             grand_total: hitungTotal()
         };
 
-        const klaimDetail = [];
+        const detailData = [];
         const rows = document.querySelectorAll("#tbodyKlaim tr");
         rows.forEach(row => {
-            klaimDetail.push({
+            const km = parseFloat(row.querySelector(".input-km").value) || 0;
+            const parkir = parseFloat(row.querySelector(".input-parkir").value) || 0;
+            detailData.push({
                 no_faktur: currentFaktur,
-                tgl: row.querySelector(".input-tgl").value,
-                asal: row.querySelector(".input-asal").value,
-                tujuan: row.querySelector(".input-tujuan").value,
-                km: row.querySelector(".input-km").value,
-                ket: row.querySelector(".input-ket").value,
-                parkir: row.querySelector(".input-parkir").value
+                tgl_kunjungan: row.querySelector(".input-tgl").value || null,
+                lokasi_asal: row.querySelector(".input-asal").value,
+                lokasi_tujuan: row.querySelector(".input-tujuan").value,
+                jumlah_km: km,
+                keterangan_kunjungan: row.querySelector(".input-ket").value,
+                biaya_parkir: parkir,
+                subtotal: (km * 500) + parkir
             });
         });
 
-        // Simpan ke Local Database
-        let dbFaktur = JSON.parse(localStorage.getItem("dbFaktur") || "{}");
-        dbFaktur[currentFaktur] = { header: klaimHeader, detail: klaimDetail };
-        localStorage.setItem("dbFaktur", JSON.stringify(dbFaktur));
+        // Upsert Header
+        const { error: errHeader } = await dbCloud.from('klaim_header').upsert(headerData);
+        if (errHeader) {
+            alert("Gagal menyimpan ke Cloud: " + errHeader.message);
+            return;
+        }
 
-        const alertBox = document.getElementById("alertMsg");
-        alertBox.innerText = `Data Faktur [${currentFaktur}] Berhasil Disimpan!`;
-        alertBox.style.display = "block";
-        setTimeout(() => { alertBox.style.display = "none"; }, 4000);
+        // Hapus detail lama jika update, lalu insert baru
+        await dbCloud.from('klaim_detail').delete().eq('no_faktur', currentFaktur);
+        const { error: errDetail } = await dbCloud.from('klaim_detail').insert(detailData);
+
+        if (errDetail) {
+            alert("Gagal menyimpan detail ke Cloud: " + errDetail.message);
+        } else {
+            const alertBox = document.getElementById("alertMsg");
+            alertBox.innerText = `Data Faktur [${currentFaktur}] Berhasil Tersimpan di Cloud!`;
+            alertBox.style.display = "block";
+            setTimeout(() => { alertBox.style.display = "none"; }, 4000);
+        }
     }
 
     function printPDF() {
         if (!currentFaktur) {
-            simpanData();
+            simpanDataCloud().then(() => window.print());
+        } else {
+            window.print();
         }
-        window.print();
     }
 
     function resetForm() {
@@ -585,32 +549,38 @@
         }
     }
 
-    /* BUKA / TUTUP MODAL PENCARIAN */
+    /* MODAL PENCARIAN CLOUD */
     function bukaModalCari() {
         document.getElementById("modalCari").style.display = "block";
-        tampilkanDaftarFaktur();
+        prosesCariFakturCloud();
     }
 
     function tutupModalCari() {
         document.getElementById("modalCari").style.display = "none";
     }
 
-    function tampilkanDaftarFaktur() {
-        const dbFaktur = JSON.parse(localStorage.getItem("dbFaktur") || "{}");
+    async function prosesCariFakturCloud() {
+        const q = document.getElementById("inputCariFaktur").value.trim();
         const divHasil = document.getElementById("hasilPencarian");
-        divHasil.innerHTML = "";
+        divHasil.innerHTML = "Memuat data cloud...";
 
-        const keys = Object.keys(dbFaktur);
-        if (keys.length === 0) {
-            divHasil.innerHTML = "<p style='color:#777;'>Belum ada data faktur tersimpan.</p>";
+        let query = dbCloud.from('klaim_header').select('*').order('tgl_input', { ascending: false });
+        if (q) {
+            query = query.or(`no_faktur.ilike.%${q}%,nama_pemakai.ilike.%${q}%`);
+        }
+
+        const { data, error } = await query.limit(20);
+
+        if (error || !data || data.length === 0) {
+            divHasil.innerHTML = "<p style='color:red;'>Data tidak ditemukan di Cloud.</p>";
             return;
         }
 
         let html = "<ul style='list-style:none; padding:0;'>";
-        keys.forEach(k => {
-            const h = dbFaktur[k].header;
-            html += `<li style='padding:8px; border-bottom:1px solid #eee; cursor:pointer;' onclick='muatFaktur("${k}")'>
-                <strong>${k}</strong> - ${h.nama_pemakai} (${h.tgl_input}) <br>
+        data.forEach(h => {
+            const tgl = new Date(h.tgl_input).toLocaleDateString('id-ID');
+            html += `<li style='padding:8px; border-bottom:1px solid #eee; cursor:pointer;' onclick='muatFakturCloud("${h.no_faktur}")'>
+                <strong>${h.no_faktur}</strong> - ${h.nama_pemakai} (${tgl}) <br>
                 <small style='color:#555;'>Total: Rp ${Math.round(h.grand_total).toLocaleString('id-ID')}</small>
             </li>`;
         });
@@ -618,58 +588,38 @@
         divHasil.innerHTML = html;
     }
 
-    function prosesCariFaktur() {
-        const q = document.getElementById("inputCariFaktur").value.trim().toLowerCase();
-        const dbFaktur = JSON.parse(localStorage.getItem("dbFaktur") || "{}");
-        const divHasil = document.getElementById("hasilPencarian");
-        divHasil.innerHTML = "";
+    async function muatFakturCloud(noFaktur) {
+        // Ambil Header
+        const { data: header, error: errH } = await dbCloud.from('klaim_header').select('*').eq('no_faktur', noFaktur).single();
+        // Ambil Detail
+        const { data: detail, error: errD } = await dbCloud.from('klaim_detail').select('*').eq('no_faktur', noFaktur);
 
-        const filtered = Object.keys(dbFaktur).filter(k => {
-            const h = dbFaktur[k].header;
-            return k.toLowerCase().includes(q) || h.nama_pemakai.toLowerCase().includes(q);
-        });
-
-        if (filtered.length === 0) {
-            divHasil.innerHTML = "<p style='color:red;'>Faktur tidak ditemukan.</p>";
+        if (errH || !header) {
+            alert("Gagal memuat faktur.");
             return;
         }
 
-        let html = "<ul style='list-style:none; padding:0;'>";
-        filtered.forEach(k => {
-            const h = dbFaktur[k].header;
-            html += `<li style='padding:8px; border-bottom:1px solid #eee; cursor:pointer;' onclick='muatFaktur("${k}")'>
-                <strong>${k}</strong> - ${h.nama_pemakai} (${h.tgl_input}) <br>
-                <small style='color:#555;'>Total: Rp ${Math.round(h.grand_total).toLocaleString('id-ID')}</small>
-            </li>`;
-        });
-        html += "</ul>";
-        divHasil.innerHTML = html;
-    }
-
-    function muatFaktur(noFaktur) {
-        const dbFaktur = JSON.parse(localStorage.getItem("dbFaktur") || "{}");
-        if (!dbFaktur[noFaktur]) return;
-
-        const data = dbFaktur[noFaktur];
-        currentFaktur = data.header.no_faktur;
-        currentTglInput = data.header.tgl_input;
+        currentFaktur = header.no_faktur;
+        currentTglInput = header.tgl_input;
 
         document.getElementById("dispNoFaktur").innerText = currentFaktur;
-        document.getElementById("dispTglInput").innerText = currentTglInput;
+        document.getElementById("dispTglInput").innerText = new Date(currentTglInput).toLocaleString('id-ID');
 
-        document.getElementById("namaPemakai").value = data.header.nama_pemakai || "";
-        document.getElementById("noPolisi").value = data.header.no_polisi || "";
-        document.getElementById("kodeUnit").value = data.header.kode_unit || "";
-        document.getElementById("costCentre").value = data.header.cost_centre || "";
-        document.getElementById("noRekening").value = data.header.no_rekening || "";
-        document.getElementById("namaRekening").value = data.header.nama_rekening || "";
-        document.getElementById("namaBank").value = data.header.nama_bank || "";
+        document.getElementById("namaPemakai").value = header.nama_pemakai || "";
+        document.getElementById("noPolisi").value = header.no_polisi || "";
+        document.getElementById("kodeUnit").value = header.kode_unit || "";
+        document.getElementById("costCentre").value = header.cost_centre || "";
+        document.getElementById("noRekening").value = header.no_rekening || "";
+        document.getElementById("namaRekening").value = header.nama_rekening || "";
+        document.getElementById("namaBank").value = header.nama_bank || "";
 
         const tbody = document.getElementById("tbodyKlaim");
         tbody.innerHTML = "";
-        data.detail.forEach(item => {
-            tambahBarisData(item.tgl, item.asal, item.tujuan, item.km, item.ket, item.parkir);
-        });
+        if (detail && detail.length > 0) {
+            detail.forEach(item => {
+                tambahBarisData(item.tgl_kunjungan, item.lokasi_asal, item.lokasi_tujuan, item.jumlah_km, item.keterangan_kunjungan, item.biaya_parkir);
+            });
+        }
 
         hitungTotal();
         tutupModalCari();
