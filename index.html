@@ -364,7 +364,7 @@
     // ==========================================
     // INSIALISASI KONEKSI SUPABASE CLOUD
     // ==========================================
-    const SUPABASE_URL = 'https://supabase.co'; 
+    const SUPABASE_URL = 'https://jvxtutqddmuzlwpmelqy.supabase.co'; 
     const SUPABASE_KEY = 'sb_publishable_V6tYk5mZKvvN94res3TUrQ_yjrMXavb'; 
     const dbCloud = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -372,16 +372,14 @@
     let currentTglInput = "";
 
     const defaultData = [
-        { tgl: "2026-08-05", asal: "ADAM MALIK", tujuan: "UD73", km: 1.4, ket: "RPIT", parkir: 0 },
-        { tgl: "2026-08-09", asal: "UD73", tujuan: "UD94", km: 2.5, ket: "RPIT", parkir: 0 },
-        { tgl: "2026-08-10", asal: "UD94", tujuan: "UE37", km: 0.8, ket: "RPIT", parkir: 0 },
-        { tgl: "2026-08-12", asal: "UE37", tujuan: "UF20", km: 1.3, ket: "RPIT", parkir: 0 },
-        { tgl: "2026-08-13", asal: "ADAM MALIK", tujuan: "UD89", km: 1.3, ket: "RPIT", parkir: 0 },
-        { tgl: "2026-08-15", asal: "UD89", tujuan: "UE42", km: 5.8, ket: "RPIT", parkir: 0 },
-        { tgl: "2026-08-18", asal: "UE42", tujuan: "UE04", km: 47.0, ket: "RPIT", parkir: 0 },
-        { tgl: "2026-08-20", asal: "UE04", tujuan: "UE19", km: 17.0, ket: "RPIT", parkir: 0 },
-        { tgl: "2026-08-26", asal: "UE19", tujuan: "UE73", km: 1.4, ket: "RPIT", parkir: 0 },
-        { tgl: "2026-08-28", asal: "UE73", tujuan: "UD90", km: 1.2, ket: "RPIT", parkir: 0 }
+        { tgl: "2026-09-23", asal: "ADAM MALIK", tujuan: "UD74", km: 28, ket: "RPIT", parkir: 0 },
+        { tgl: "2026-09-23", asal: "UD74", tujuan: "UE65", km: 27, ket: "RPIT", parkir: 0 },
+        { tgl: "2026-09-23", asal: "UE65", tujuan: "UE63", km: 0.5, ket: "RPIT", parkir: 0 },
+        { tgl: "2026-09-23", asal: "UE63", tujuan: "UE64", km: 1.2, ket: "RPIT", parkir: 0 },
+        { tgl: "2026-09-23", asal: "UE64", tujuan: "UE79", km: 18, ket: "RPIT", parkir: 0 },
+        { tgl: "2026-09-23", asal: "UE79", tujuan: "UE60", km: 1.1, ket: "RPIT", parkir: 0 },
+        { tgl: "2026-09-23", asal: "UE60", tujuan: "UE62", km: 0.8, ket: "RPIT", parkir: 0 },
+        { tgl: "2026-09-23", asal: "UE62", tujuan: "UE61", km: 1.6, ket: "RPIT", parkir: 0 }
     ];
 
     function initPage() {
@@ -502,24 +500,31 @@
             });
         });
 
-        // Upsert Header
-        const { error: errHeader } = await dbCloud.from('klaim_header').upsert(headerData);
-        if (errHeader) {
-            alert("Gagal menyimpan ke Cloud: " + errHeader.message);
-            return;
-        }
+        try {
+            // Upsert Header
+            const { error: errHeader } = await dbCloud.from('klaim_header').upsert(headerData);
+            if (errHeader) {
+                alert("Gagal menyimpan Header ke Cloud:\n" + errHeader.message);
+                return;
+            }
 
-        // Hapus detail lama jika update, lalu insert baru
-        await dbCloud.from('klaim_detail').delete().eq('no_faktur', currentFaktur);
-        const { error: errDetail } = await dbCloud.from('klaim_detail').insert(detailData);
+            // Delete detail lama jika ada, lalu insert detail baru
+            await dbCloud.from('klaim_detail').delete().eq('no_faktur', currentFaktur);
+            const { error: errDetail } = await dbCloud.from('klaim_detail').insert(detailData);
 
-        if (errDetail) {
-            alert("Gagal menyimpan detail ke Cloud: " + errDetail.message);
-        } else {
+            if (errDetail) {
+                alert("Gagal menyimpan Detail ke Cloud:\n" + errDetail.message);
+                return;
+            }
+
+            alert(`BERHASIL! Data Faktur [${currentFaktur}] tersimpan di Cloud.`);
             const alertBox = document.getElementById("alertMsg");
-            alertBox.innerText = `Data Faktur [${currentFaktur}] Berhasil Tersimpan di Cloud!`;
+            alertBox.innerText = `Data Faktur [${currentFaktur}] Berhasil Tersimpan!`;
             alertBox.style.display = "block";
             setTimeout(() => { alertBox.style.display = "none"; }, 4000);
+
+        } catch(e) {
+            alert("Kesalahan Koneksi Supabase: " + e.message);
         }
     }
 
@@ -589,9 +594,7 @@
     }
 
     async function muatFakturCloud(noFaktur) {
-        // Ambil Header
         const { data: header, error: errH } = await dbCloud.from('klaim_header').select('*').eq('no_faktur', noFaktur).single();
-        // Ambil Detail
         const { data: detail, error: errD } = await dbCloud.from('klaim_detail').select('*').eq('no_faktur', noFaktur);
 
         if (errH || !header) {
