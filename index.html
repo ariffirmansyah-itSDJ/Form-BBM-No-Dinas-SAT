@@ -117,7 +117,7 @@
         /* Tabel Detail Perjalanan */
         .klaim-table {
             width: 100%;
-            min-width: 900px; /* Menjaga lebar tabel tetap proporsional saat di-scroll */
+            min-width: 900px;
             border-collapse: collapse;
             font-size: 12px;
         }
@@ -229,9 +229,7 @@
             margin-bottom: 10px;
         }
 
-        /* ========================================== */
-        /* STYLE KHUSUS MOBILE / HP (RESPONSIF) */
-        /* ========================================== */
+        /* STYLE RESPONSIF HP */
         @media screen and (max-width: 768px) {
             body {
                 margin: 5px;
@@ -254,7 +252,6 @@
                 padding: 10px 5px;
                 font-size: 12px;
             }
-            /* Ubah Form Header Menjadi 1 Kolom Bersusun di HP */
             .info-table tr {
                 display: flex;
                 flex-direction: column;
@@ -281,15 +278,29 @@
             }
         }
 
-        /* ========================================== */
-        /* STYLE KHUSUS CETAK / PRINT (A4 LANDSCAPE) */
-        /* ========================================== */
+        /* STYLE KHUSUS PRINT / CETAK PDF (PERSIS HASIL AKHIR) */
         @media print {
             body { background: #fff; margin: 0; padding: 0; }
             .container { box-shadow: none; padding: 0; width: 100%; max-width: 100%; }
             .no-print { display: none !important; }
-            input { border: none !important; background: transparent !important; box-shadow: none !important; padding: 0 !important; }
-            input[type="date"]::-webkit-calendar-picker-indicator { display: none; }
+            
+            input { 
+                border: none !important; 
+                background: transparent !important; 
+                box-shadow: none !important; 
+                padding: 0 !important; 
+                appearance: none !important;
+                -webkit-appearance: none !important;
+            }
+            
+            /* Menghilangkan ikon kalender/check pada input date saat cetak */
+            input[type="date"]::-webkit-calendar-picker-indicator,
+            input[type="date"]::-webkit-inner-spin-button,
+            input[type="date"]::-webkit-clear-button {
+                display: none !important;
+                -webkit-appearance: none !important;
+            }
+            
             .table-responsive { overflow-x: visible !important; }
             .klaim-table { min-width: 100% !important; }
             .klaim-table th { background-color: transparent !important; }
@@ -327,7 +338,8 @@
         FORM KLAIM KENDARAAN NON FASILITAS JABATAN (MOBIL/MOTOR)
     </div>
 
-    <div style="margin-bottom: 15px; font-size: 13px; font-weight: bold; color: #333;" id="infoFakturBar">
+    <!-- Informasi Faktur (Disembunyikan saat cetak PDF dengan class no-print) -->
+    <div style="margin-bottom: 15px; font-size: 13px; font-weight: bold; color: #333;" id="infoFakturBar" class="no-print">
         No. Faktur: <span id="dispNoFaktur" style="color: #007bff;">(Otomatis saat simpan)</span> | 
         Tgl Input: <span id="dispTglInput">-</span>
     </div>
@@ -375,7 +387,7 @@
     <!-- Tombol Tambah Baris -->
     <button class="btn btn-add no-print" onclick="tambahBaris()">+ Tambah Baris Perjalanan</button>
 
-    <!-- Pembungkus Responsif Layar HP -->
+    <!-- Pembungkus Tabel -->
     <div class="table-responsive">
         <table class="klaim-table" id="tabelKlaim">
             <thead>
