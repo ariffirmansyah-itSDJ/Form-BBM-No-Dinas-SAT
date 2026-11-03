@@ -25,6 +25,7 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.15);
         }
         
+        /* Action Bar */
         .action-bar {
             display: flex;
             justify-content: space-between;
@@ -49,13 +50,14 @@
             font-size: 13px;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
         }
         .btn-save { background-color: #28a745; color: white; }
         .btn-print { background-color: #007bff; color: white; }
         .btn-reset { background-color: #6c757d; color: white; }
         .btn-search { background-color: #ffc107; color: #212529; }
-        .btn-add { background-color: #17a2b8; color: white; margin-bottom: 12px; font-size: 13px; padding: 8px 16px; }
+        .btn-add { background-color: #17a2b8; color: white; margin-bottom: 12px; font-size: 13px; padding: 10px 18px; }
         .btn-remove { background-color: #dc3545; color: white; padding: 4px 8px; font-size: 12px; border-radius: 3px; border:none; cursor:pointer;}
         .btn:hover { opacity: 0.9; }
 
@@ -72,6 +74,7 @@
             margin-bottom: 20px;
         }
 
+        /* Form Header Informasi Pemakai */
         .info-table {
             width: 100%;
             border-collapse: collapse;
@@ -86,6 +89,7 @@
         .info-table td.label {
             font-weight: bold;
             width: 15%;
+            white-space: nowrap;
         }
         .info-table td.colon {
             width: 1%;
@@ -95,18 +99,27 @@
         }
         .info-table input {
             width: 100%;
-            padding: 6px 8px;
+            padding: 8px;
             border: 1px solid #aaa;
             border-radius: 4px;
             font-size: 13px;
             background-color: #fff;
         }
 
+        /* Pembungkus Tabel Agar Bisa Scroll di HP */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 15px;
+        }
+
+        /* Tabel Detail Perjalanan */
         .klaim-table {
             width: 100%;
+            min-width: 900px; /* Menjaga lebar tabel tetap proporsional saat di-scroll */
             border-collapse: collapse;
             font-size: 12px;
-            margin-bottom: 15px;
         }
         .klaim-table, .klaim-table th, .klaim-table td {
             border: 1px solid #000;
@@ -135,11 +148,14 @@
         .klaim-table input.text-left { text-align: left; }
         .klaim-table input.text-center { text-align: center; }
 
+        /* Area Tanda Tangan & Footer */
         .footer-section {
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
-            margin-top: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
         .signatures-container {
             display: flex;
@@ -170,9 +186,9 @@
             font-weight: bold;
             font-size: 13px;
             letter-spacing: 0.5px;
-            margin-bottom: 5px;
         }
 
+        /* Modal Popup Pencarian */
         .modal {
             display: none;
             position: fixed;
@@ -210,15 +226,78 @@
             border: 1px solid #c3e6cb;
             border-radius: 4px;
             font-size: 12px;
+            margin-bottom: 10px;
         }
 
+        /* ========================================== */
+        /* STYLE KHUSUS MOBILE / HP (RESPONSIF) */
+        /* ========================================== */
+        @media screen and (max-width: 768px) {
+            body {
+                margin: 5px;
+            }
+            .container {
+                padding: 15px 10px;
+            }
+            .action-bar {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+            }
+            .btn-group {
+                width: 100%;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .btn {
+                padding: 10px 5px;
+                font-size: 12px;
+            }
+            /* Ubah Form Header Menjadi 1 Kolom Bersusun di HP */
+            .info-table tr {
+                display: flex;
+                flex-direction: column;
+                margin-bottom: 10px;
+            }
+            .info-table td {
+                display: block;
+                width: 100% !important;
+                padding: 2px 0;
+            }
+            .info-table td.colon {
+                display: none;
+            }
+            .info-table td.label {
+                margin-top: 5px;
+            }
+            .footer-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .internal-box {
+                align-self: center;
+                margin-top: 15px;
+            }
+        }
+
+        /* ========================================== */
+        /* STYLE KHUSUS CETAK / PRINT (A4 LANDSCAPE) */
+        /* ========================================== */
         @media print {
             body { background: #fff; margin: 0; padding: 0; }
             .container { box-shadow: none; padding: 0; width: 100%; max-width: 100%; }
             .no-print { display: none !important; }
             input { border: none !important; background: transparent !important; box-shadow: none !important; padding: 0 !important; }
             input[type="date"]::-webkit-calendar-picker-indicator { display: none; }
+            .table-responsive { overflow-x: visible !important; }
+            .klaim-table { min-width: 100% !important; }
             .klaim-table th { background-color: transparent !important; }
+            .info-table tr { display: table-row !important; }
+            .info-table td { display: table-cell !important; }
+            .info-table td.colon { display: table-cell !important; }
+            .info-table td.label { width: 15% !important; }
+            .info-table td.val { width: 34% !important; }
             @page { size: A4 landscape; margin: 10mm; }
         }
     </style>
@@ -227,6 +306,7 @@
 
 <div class="container">
     
+    <!-- Action Bar -->
     <div class="action-bar no-print">
         <div id="alertMsg">Data berhasil disimpan!</div>
         <div class="btn-group" style="margin-left: auto;">
@@ -237,19 +317,22 @@
         </div>
     </div>
 
-    <div style="margin-bottom: 15px; font-size: 13px; font-weight: bold; color: #333;" id="infoFakturBar">
-        No. Faktur: <span id="dispNoFaktur" style="color: #007bff;">(Otomatis saat simpan)</span> | 
-        Tgl Input: <span id="dispTglInput">-</span>
-    </div>
-    
+    <!-- Header Perusahaan -->
     <div class="company-header">
         PT SUMBER ALFARIA TRIJAYA TBK
     </div>
 
+    <!-- Judul Form -->
     <div class="form-title">
         FORM KLAIM KENDARAAN NON FASILITAS JABATAN (MOBIL/MOTOR)
     </div>
 
+    <div style="margin-bottom: 15px; font-size: 13px; font-weight: bold; color: #333;" id="infoFakturBar">
+        No. Faktur: <span id="dispNoFaktur" style="color: #007bff;">(Otomatis saat simpan)</span> | 
+        Tgl Input: <span id="dispTglInput">-</span>
+    </div>
+
+    <!-- Form Informasi Header -->
     <table class="info-table">
         <tr>
             <td class="label">Nama Pemakai</td>
@@ -289,33 +372,38 @@
         </tr>
     </table>
 
+    <!-- Tombol Tambah Baris -->
     <button class="btn btn-add no-print" onclick="tambahBaris()">+ Tambah Baris Perjalanan</button>
 
-    <table class="klaim-table" id="tabelKlaim">
-        <thead>
-            <tr>
-                <th style="width: 9%;">Tgl</th>
-                <th style="width: 14%;">Dari Lokasi Asal</th>
-                <th style="width: 14%;">Ke Lokasi Tujuan</th>
-                <th style="width: 8%;">Jumlah Km</th>
-                <th style="width: 14%;">Keterangan Kunjungan</th>
-                <th style="width: 11%;">Mobil<br><small>Jml Km x Rp1,000.00</small></th>
-                <th style="width: 11%;">Motor<br><small>Jml Km x Rp500.00</small></th>
-                <th style="width: 7%;">Parkir/Tol</th>
-                <th style="width: 18%;">Total Rp</th>
-                <th class="no-print" style="width: 4%;">Aksi</th>
-            </tr>
-        </thead>
-        <tbody id="tbodyKlaim"></tbody>
-        <tfoot>
-            <tr style="font-weight: bold; background-color: #f8f9fa;">
-                <td colspan="8" style="text-align: right; padding-right: 10px;">Total Rp</td>
-                <td style="text-align: right; padding-right: 8px; font-size: 13px; white-space: nowrap;" id="grandTotalText">Rp 0</td>
-                <td class="no-print"></td>
-            </tr>
-        </tfoot>
-    </table>
+    <!-- Pembungkus Responsif Layar HP -->
+    <div class="table-responsive">
+        <table class="klaim-table" id="tabelKlaim">
+            <thead>
+                <tr>
+                    <th style="width: 10%;">Tgl</th>
+                    <th style="width: 14%;">Dari Lokasi Asal</th>
+                    <th style="width: 14%;">Ke Lokasi Tujuan</th>
+                    <th style="width: 8%;">Jumlah Km</th>
+                    <th style="width: 14%;">Keterangan Kunjungan</th>
+                    <th style="width: 11%;">Mobil<br><small>Jml Km x Rp1,000.00</small></th>
+                    <th style="width: 11%;">Motor<br><small>Jml Km x Rp500.00</small></th>
+                    <th style="width: 7%;">Parkir/Tol</th>
+                    <th style="width: 17%;">Total Rp</th>
+                    <th class="no-print" style="width: 4%;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyKlaim"></tbody>
+            <tfoot>
+                <tr style="font-weight: bold; background-color: #f8f9fa;">
+                    <td colspan="8" style="text-align: right; padding-right: 10px;">Total Rp</td>
+                    <td style="text-align: right; padding-right: 8px; font-size: 13px; white-space: nowrap;" id="grandTotalText">Rp 0</td>
+                    <td class="no-print"></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
 
+    <!-- Tanda Tangan & Footer Ref -->
     <div class="footer-section">
         <div>
             <div class="signatures-container">
@@ -361,11 +449,9 @@
 </div>
 
 <script>
-    // ==========================================
     // INSIALISASI KONEKSI SUPABASE CLOUD
-    // ==========================================
     const SUPABASE_URL = 'https://jvxtutqddmuzlwpmelqy.supabase.co'; 
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2eHR1dHFkZG11emx3cG1lbHF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE2MzgyNzMsImV4cCI6MjEwNzIxNDI3M30.I1mBOWkkYt3i6hbDon3Pr0QZeTpxJVwRBYR_VkpRGOY'; 
+    const SUPABASE_KEY = 'sb_publishable_V6tYk5mZKvvN94res3TUrQ_yjrMXavb'; 
     const dbCloud = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentFaktur = "";
@@ -460,7 +546,6 @@
         return `FK-${dateStr}-${rand}`;
     }
 
-    // SIMPAN KE DATABASE CLOUD SUPABASE
     async function simpanDataCloud() {
         if (!currentFaktur) {
             currentFaktur = generateNoFaktur();
@@ -501,14 +586,12 @@
         });
 
         try {
-            // Upsert Header
             const { error: errHeader } = await dbCloud.from('klaim_header').upsert(headerData);
             if (errHeader) {
                 alert("Gagal menyimpan Header ke Cloud:\n" + errHeader.message);
                 return;
             }
 
-            // Delete detail lama jika ada, lalu insert detail baru
             await dbCloud.from('klaim_detail').delete().eq('no_faktur', currentFaktur);
             const { error: errDetail } = await dbCloud.from('klaim_detail').insert(detailData);
 
@@ -554,7 +637,6 @@
         }
     }
 
-    /* MODAL PENCARIAN CLOUD */
     function bukaModalCari() {
         document.getElementById("modalCari").style.display = "block";
         prosesCariFakturCloud();
