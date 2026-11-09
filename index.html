@@ -173,7 +173,7 @@
             min-width: 120px;
         }
         
-        /* Area Tempat Gambar Tanda Tangan Muncul (Posisi Tanda X) */
+        /* Area Tempat Gambar Tanda Tangan Muncul */
         .sign-img-wrapper {
             height: 70px;
             display: flex;
@@ -240,7 +240,7 @@
             border-radius: 6px;
             background-color: #fdfdfd;
             cursor: crosshair;
-            touch-action: none; /* Menghindari layar HP ter-scroll saat membuat tanda tangan */
+            touch-action: none;
             width: 100%;
             height: 180px;
         }
@@ -336,7 +336,6 @@
             .info-table td.label { width: 15% !important; }
             .info-table td.val { width: 34% !important; }
             
-            /* Pastikan Gambar Tanda Tangan Tetap Tampil Sangat Jelas Saat Cetak PDF */
             .img-ttd {
                 display: block !important;
                 max-height: 65px !important;
@@ -453,12 +452,10 @@
     <div class="footer-section">
         <div>
             <div class="signatures-container">
-                <!-- Kolom Tanda Tangan User (Muncul Pada Posisi Tanda X) -->
+                <!-- Kolom Tanda Tangan User -->
                 <div class="sign-col">
                     <div>Dibuat Oleh,</div>
-                    <div class="sign-img-wrapper" id="areaTTDUser">
-                        <!-- Gambar Tanda Tangan Digital Dimuat di Sini -->
-                    </div>
+                    <div class="sign-img-wrapper" id="areaTTDUser"></div>
                     <div>(User)</div>
                 </div>
                 
@@ -618,8 +615,21 @@
         return `FK-${dateStr}-${rand}`;
     }
 
+    // FUNGSI CEK VALIDASI TANDA TANGAN USER
+    function cekValidasiTTD() {
+        if (!ttdBase64 || ttdBase64.trim() === "") {
+            alert("⚠️ PERHATIAN!\n\nAnda belum melakukan tanda tangan. Silakan buat tanda tangan digital terlebih dahulu sebelum melakukan Simpan Data atau Print PDF.");
+            bukaModalTTD();
+            return false;
+        }
+        return true;
+    }
+
     // SIMPAN KE DATABASE CLOUD SUPABASE
     async function simpanDataCloud() {
+        // KUNCIAN TANDA TANGAN: Cek apakah TTD sudah ada
+        if (!cekValidasiTTD()) return;
+
         if (!currentFaktur) {
             currentFaktur = generateNoFaktur();
             currentTglInput = new Date().toISOString();
@@ -638,7 +648,7 @@
             no_rekening: document.getElementById("noRekening").value,
             nama_rekening: document.getElementById("namaRekening").value,
             nama_bank: document.getElementById("namaBank").value,
-            ttd_user: ttdBase64, // Menyimpan gambar TTD ke database
+            ttd_user: ttdBase64,
             grand_total: hitungTotal()
         };
 
@@ -686,6 +696,9 @@
     }
 
     function printPDF() {
+        // KUNCIAN TANDA TANGAN: Cek apakah TTD sudah ada sebelum print
+        if (!cekValidasiTTD()) return;
+
         if (!currentFaktur) {
             simpanDataCloud().then(() => window.print());
         } else {
@@ -775,7 +788,6 @@
         document.getElementById("namaRekening").value = header.nama_rekening || "";
         document.getElementById("namaBank").value = header.nama_bank || "";
 
-        // Muat Gambar TTD jika ada
         if (header.ttd_user) {
             ttdBase64 = header.ttd_user;
             document.getElementById("areaTTDUser").innerHTML = `<img src="${ttdBase64}" class="img-ttd">`;
@@ -796,16 +808,13 @@
         tutupModalCari();
     }
 
-    // ==========================================
     // LOGIKA TANDA TANGAN DIGITAL (CANVAS)
-    // ==========================================
     let canvas, ctx, isDrawing = false;
 
     function initCanvasTTD() {
         canvas = document.getElementById("canvasTTD");
         ctx = canvas.getContext("2d");
 
-        // Set ukuran resolusi internal canvas
         canvas.width = 450;
         canvas.height = 180;
 
@@ -813,13 +822,11 @@
         ctx.lineCap = "round";
         ctx.strokeStyle = "#000";
 
-        // Event Mouse (Komputer)
         canvas.addEventListener("mousedown", startDrawing);
         canvas.addEventListener("mousemove", draw);
         canvas.addEventListener("mouseup", stopDrawing);
         canvas.addEventListener("mouseleave", stopDrawing);
 
-        // Event Touch (Layar HP / Tablet)
         canvas.addEventListener("touchstart", startDrawingTouch);
         canvas.addEventListener("touchmove", drawTouch);
         canvas.addEventListener("touchend", stopDrawing);
@@ -879,7 +886,6 @@
     }
 
     function simpanTTD() {
-        // Konversi kanvas ke gambar PNG Base64
         ttdBase64 = canvas.toDataURL("image/png");
         document.getElementById("areaTTDUser").innerHTML = `<img src="${ttdBase64}" class="img-ttd">`;
         tutupModalTTD();
