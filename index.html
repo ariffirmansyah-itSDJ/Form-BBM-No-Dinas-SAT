@@ -57,6 +57,7 @@
         .btn-print { background-color: #007bff; color: white; }
         .btn-reset { background-color: #6c757d; color: white; }
         .btn-search { background-color: #ffc107; color: #212529; }
+        .btn-ttd { background-color: #6f42c1; color: white; }
         .btn-add { background-color: #17a2b8; color: white; margin-bottom: 12px; font-size: 13px; padding: 10px 18px; }
         .btn-remove { background-color: #dc3545; color: white; padding: 4px 8px; font-size: 12px; border-radius: 3px; border:none; cursor:pointer;}
         .btn:hover { opacity: 0.9; }
@@ -166,15 +167,30 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            height: 90px;
+            height: 110px;
             font-size: 12px;
+            position: relative;
+            min-width: 120px;
+        }
+        
+        /* Area Tempat Gambar Tanda Tangan Muncul (Posisi Tanda X) */
+        .sign-img-wrapper {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .img-ttd {
+            max-height: 65px;
+            max-width: 120px;
+            object-fit: contain;
         }
 
         .footer-ref-text {
             font-size: 10.5px;
             color: #000;
             line-height: 1.35;
-            margin-top: 25px;
+            margin-top: 15px;
             margin-left: 20px;
         }
 
@@ -188,7 +204,7 @@
             letter-spacing: 0.5px;
         }
 
-        /* Modal Popup Pencarian */
+        /* Modal Pop-up (Pencarian & Canvas TTD) */
         .modal {
             display: none;
             position: fixed;
@@ -201,7 +217,7 @@
         }
         .modal-content {
             background-color: #fff;
-            margin: 10% auto;
+            margin: 8% auto;
             padding: 20px;
             border-radius: 8px;
             width: 90%;
@@ -217,6 +233,17 @@
             margin-bottom: 15px;
         }
         .close-modal { font-size: 20px; cursor: pointer; font-weight: bold; }
+
+        /* Style Canvas Tanda Tangan */
+        #canvasTTD {
+            border: 2px dashed #007bff;
+            border-radius: 6px;
+            background-color: #fdfdfd;
+            cursor: crosshair;
+            touch-action: none; /* Menghindari layar HP ter-scroll saat membuat tanda tangan */
+            width: 100%;
+            height: 180px;
+        }
 
         #alertMsg {
             display: none;
@@ -278,7 +305,7 @@
             }
         }
 
-        /* STYLE KHUSUS PRINT / CETAK PDF (PERSIS HASIL AKHIR) */
+        /* STYLE KHUSUS PRINT / CETAK PDF */
         @media print {
             body { background: #fff; margin: 0; padding: 0; }
             .container { box-shadow: none; padding: 0; width: 100%; max-width: 100%; }
@@ -293,7 +320,6 @@
                 -webkit-appearance: none !important;
             }
             
-            /* Menghilangkan ikon kalender/check pada input date saat cetak */
             input[type="date"]::-webkit-calendar-picker-indicator,
             input[type="date"]::-webkit-inner-spin-button,
             input[type="date"]::-webkit-clear-button {
@@ -309,6 +335,13 @@
             .info-table td.colon { display: table-cell !important; }
             .info-table td.label { width: 15% !important; }
             .info-table td.val { width: 34% !important; }
+            
+            /* Pastikan Gambar Tanda Tangan Tetap Tampil Sangat Jelas Saat Cetak PDF */
+            .img-ttd {
+                display: block !important;
+                max-height: 65px !important;
+            }
+
             @page { size: A4 landscape; margin: 10mm; }
         }
     </style>
@@ -323,6 +356,7 @@
         <div class="btn-group" style="margin-left: auto;">
             <button class="btn btn-reset" onclick="resetForm()">🔄 Bersihkan Form</button>
             <button class="btn btn-search" onclick="bukaModalCari()">🔍 Cari Data</button>
+            <button class="btn btn-ttd" onclick="bukaModalTTD()">✍️ Tanda Tangan</button>
             <button class="btn btn-save" onclick="simpanDataCloud()">💾 Simpan Data</button>
             <button class="btn btn-print" onclick="printPDF()">🖨️ Print PDF</button>
         </div>
@@ -338,7 +372,7 @@
         FORM KLAIM KENDARAAN NON FASILITAS JABATAN (MOBIL/MOTOR)
     </div>
 
-    <!-- Informasi Faktur (Disembunyikan saat cetak PDF dengan class no-print) -->
+    <!-- Informasi Faktur -->
     <div style="margin-bottom: 15px; font-size: 13px; font-weight: bold; color: #333;" id="infoFakturBar" class="no-print">
         No. Faktur: <span id="dispNoFaktur" style="color: #007bff;">(Otomatis saat simpan)</span> | 
         Tgl Input: <span id="dispTglInput">-</span>
@@ -419,12 +453,18 @@
     <div class="footer-section">
         <div>
             <div class="signatures-container">
+                <!-- Kolom Tanda Tangan User (Muncul Pada Posisi Tanda X) -->
                 <div class="sign-col">
                     <div>Dibuat Oleh,</div>
+                    <div class="sign-img-wrapper" id="areaTTDUser">
+                        <!-- Gambar Tanda Tangan Digital Dimuat di Sini -->
+                    </div>
                     <div>(User)</div>
                 </div>
+                
                 <div class="sign-col">
                     <div>Mengetahui,</div>
+                    <div class="sign-img-wrapper"></div>
                     <div>(Checker GS)</div>
                 </div>
             </div>
@@ -442,6 +482,24 @@
         </div>
     </div>
 
+</div>
+
+<!-- MODAL POPUP TANDA TANGAN DIGITAL -->
+<div id="modalTTD" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 style="margin:0;">Buat Tanda Tangan Digital</h3>
+            <span class="close-modal" onclick="tutupModalTTD()">&times;</span>
+        </div>
+        <div style="text-align: center;">
+            <p style="font-size: 12px; color: #555; margin-bottom: 8px;">Goreskan tanda tangan Anda pada kotak di bawah ini:</p>
+            <canvas id="canvasTTD"></canvas>
+            <div style="display: flex; justify-content: space-between; margin-top: 12px;">
+                <button class="btn btn-reset" onclick="bersihkanCanvas()">🗑️ Hapus / Ulangi</button>
+                <button class="btn btn-save" onclick="simpanTTD()">✅ Terapkan TTD</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- MODAL POPUP PENCARIAN -->
@@ -468,6 +526,7 @@
 
     let currentFaktur = "";
     let currentTglInput = "";
+    let ttdBase64 = ""; // Menyimpan string gambar TTD
 
     const defaultData = [
         { tgl: "2026-09-23", asal: "ADAM MALIK", tujuan: "UD74", km: 28, ket: "RPIT", parkir: 0 },
@@ -487,6 +546,7 @@
             tambahBarisData(item.tgl, item.asal, item.tujuan, item.km, item.ket, item.parkir);
         });
         hitungTotal();
+        initCanvasTTD();
     }
 
     function tambahBaris() {
@@ -558,6 +618,7 @@
         return `FK-${dateStr}-${rand}`;
     }
 
+    // SIMPAN KE DATABASE CLOUD SUPABASE
     async function simpanDataCloud() {
         if (!currentFaktur) {
             currentFaktur = generateNoFaktur();
@@ -577,6 +638,7 @@
             no_rekening: document.getElementById("noRekening").value,
             nama_rekening: document.getElementById("namaRekening").value,
             nama_bank: document.getElementById("namaBank").value,
+            ttd_user: ttdBase64, // Menyimpan gambar TTD ke database
             grand_total: hitungTotal()
         };
 
@@ -635,6 +697,8 @@
         if(confirm("Apakah Anda yakin ingin mengosongkan formulir?")) {
             currentFaktur = "";
             currentTglInput = "";
+            ttdBase64 = "";
+            document.getElementById("areaTTDUser").innerHTML = "";
             document.getElementById("dispNoFaktur").innerText = "(Otomatis saat simpan)";
             document.getElementById("dispTglInput").innerText = "-";
             document.getElementById("namaPemakai").value = "";
@@ -649,6 +713,7 @@
         }
     }
 
+    /* MODAL PENCARIAN CLOUD */
     function bukaModalCari() {
         document.getElementById("modalCari").style.display = "block";
         prosesCariFakturCloud();
@@ -710,6 +775,15 @@
         document.getElementById("namaRekening").value = header.nama_rekening || "";
         document.getElementById("namaBank").value = header.nama_bank || "";
 
+        // Muat Gambar TTD jika ada
+        if (header.ttd_user) {
+            ttdBase64 = header.ttd_user;
+            document.getElementById("areaTTDUser").innerHTML = `<img src="${ttdBase64}" class="img-ttd">`;
+        } else {
+            ttdBase64 = "";
+            document.getElementById("areaTTDUser").innerHTML = "";
+        }
+
         const tbody = document.getElementById("tbodyKlaim");
         tbody.innerHTML = "";
         if (detail && detail.length > 0) {
@@ -720,6 +794,95 @@
 
         hitungTotal();
         tutupModalCari();
+    }
+
+    // ==========================================
+    // LOGIKA TANDA TANGAN DIGITAL (CANVAS)
+    // ==========================================
+    let canvas, ctx, isDrawing = false;
+
+    function initCanvasTTD() {
+        canvas = document.getElementById("canvasTTD");
+        ctx = canvas.getContext("2d");
+
+        // Set ukuran resolusi internal canvas
+        canvas.width = 450;
+        canvas.height = 180;
+
+        ctx.lineWidth = 3;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "#000";
+
+        // Event Mouse (Komputer)
+        canvas.addEventListener("mousedown", startDrawing);
+        canvas.addEventListener("mousemove", draw);
+        canvas.addEventListener("mouseup", stopDrawing);
+        canvas.addEventListener("mouseleave", stopDrawing);
+
+        // Event Touch (Layar HP / Tablet)
+        canvas.addEventListener("touchstart", startDrawingTouch);
+        canvas.addEventListener("touchmove", drawTouch);
+        canvas.addEventListener("touchend", stopDrawing);
+    }
+
+    function getTouchPos(canvasDom, touchEvent) {
+        var rect = canvasDom.getBoundingClientRect();
+        return {
+            x: touchEvent.touches[0].clientX - rect.left,
+            y: touchEvent.touches[0].clientY - rect.top
+        };
+    }
+
+    function startDrawing(e) {
+        isDrawing = true;
+        ctx.beginPath();
+        ctx.moveTo(e.offsetX, e.offsetY);
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+        ctx.lineTo(e.offsetX, e.offsetY);
+        ctx.stroke();
+    }
+
+    function startDrawingTouch(e) {
+        e.preventDefault();
+        isDrawing = true;
+        var pos = getTouchPos(canvas, e);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+    }
+
+    function drawTouch(e) {
+        e.preventDefault();
+        if (!isDrawing) return;
+        var pos = getTouchPos(canvas, e);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+    }
+
+    function stopDrawing() {
+        isDrawing = false;
+    }
+
+    function bersihkanCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function bukaModalTTD() {
+        document.getElementById("modalTTD").style.display = "block";
+        setTimeout(bersihkanCanvas, 100);
+    }
+
+    function tutupModalTTD() {
+        document.getElementById("modalTTD").style.display = "none";
+    }
+
+    function simpanTTD() {
+        // Konversi kanvas ke gambar PNG Base64
+        ttdBase64 = canvas.toDataURL("image/png");
+        document.getElementById("areaTTDUser").innerHTML = `<img src="${ttdBase64}" class="img-ttd">`;
+        tutupModalTTD();
     }
 
     window.onload = initPage;
